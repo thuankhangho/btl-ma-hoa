@@ -27,17 +27,13 @@
   <div class="container nav-in">
     <a class="logo" href="/" aria-label="Ký số, trang chủ">
       <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#1239AC"/><path d="M11 25c4-1 6-9 9-9s2 6 5 6 3-4 4-6" fill="none" stroke="#F7C02D" stroke-width="2.6" stroke-linecap="round"/><path d="M11 29h18" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
-      <span>Ký<b>Số</b></span>
+      <span>Ký <b>Số</b></span>
     </a>
     <nav class="menu" aria-label="Menu chính">
       <a href="/" class="{{ 'on' if active_page == 'home' }}">Ký số</a>
       <a href="/#xacminh">Xác minh</a>
       <a href="/#kientruc">Kiến trúc</a>
     </nav>
-    <div class="quick">
-      <span class="quick-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM7 9l3 3-3 3M12 15h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      <span><small>CHẠY NHANH</small><code>python app.py</code></span>
-    </div>
   </div>
 </header>
 
@@ -55,16 +51,6 @@
 {% block content %}{% endblock %}
 </main>
 
-<!-- ================= Dải thống kê ================= -->
-<section class="stats">
-  <div class="container stats-in">
-    <div class="stat"><b>3</b><span>lược đồ chữ ký: RSA, ElGamal, DSA</span></div>
-    <div class="stat"><b>8</b><span>module mật mã tự viết</span></div>
-    <div class="stat"><b>7</b><span>bước kiểm tra khi xác minh</span></div>
-    <div class="stat"><b>0</b><span>thư viện mã hóa bên ngoài</span></div>
-  </div>
-</section>
-
 <!-- ================= Kêu gọi ================= -->
 <section class="cta container">
   <div class="cta-box">
@@ -81,7 +67,7 @@
 <footer class="footer">
   <div class="container foot-in">
     <div class="foot-col foot-brand">
-      <a class="logo logo-light" href="/"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#fff"/><path d="M11 25c4-1 6-9 9-9s2 6 5 6 3-4 4-6" fill="none" stroke="#F7C02D" stroke-width="2.6" stroke-linecap="round"/><path d="M11 29h18" stroke="#1239AC" stroke-width="2" stroke-linecap="round"/></svg><span>Ký<b>Số</b></span></a>
+      <a class="logo logo-light" href="/"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#fff"/><path d="M11 25c4-1 6-9 9-9s2 6 5 6 3-4 4-6" fill="none" stroke="#F7C02D" stroke-width="2.6" stroke-linecap="round"/><path d="M11 29h18" stroke="#1239AC" stroke-width="2" stroke-linecap="round"/></svg><span>Ký <b>Số</b></span></a>
       <p>Demo ký số phục vụ môn Mã hóa thông tin nâng cao. Chỉ dùng để học, không có giá trị pháp lý.</p>
     </div>
     <div class="foot-col">
@@ -92,12 +78,9 @@
       <h4>Lược đồ chữ ký</h4>
       <span>RSA-PSS 2048</span><span>ElGamal 2048</span><span>DSA (2048, 256)</span>
     </div>
-    <div class="foot-col">
-      <h4>Tài liệu trong project</h4>
-      <span><code>README.md</code></span><span><code>docs/THIET-KE.md</code></span><span><code>deploy/install.sh</code></span>
-    </div>
+    
   </div>
-  <div class="container copyright">COM608 · Ký số · mật mã tự cài đặt bằng Python</div>
+  <div class="container copyright">COM608 · Ký số</div>
 </footer>
 
 {% block scripts %}{% endblock %}
