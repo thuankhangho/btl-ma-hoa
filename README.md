@@ -48,10 +48,14 @@ ky-so-python/
 ## Chạy trên máy cá nhân
 
 ```bash
-cd ky-so-python
+cd btl-ma-hoa
+# Cách 1: chạy trên môi trường ảo
 python3 -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt                        # chỉ Flask
 python app.py                                          # http://127.0.0.1:5000
+# Cách 2: chạy trực tiếp
+pip3 install -r requirements.txt                        # chỉ Flask
+python3 app.py                                          # http://127.0.0.1:5000
 ```
 
 Yêu cầu Python 3.9 trở lên.
