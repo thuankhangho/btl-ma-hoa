@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Ký số{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- ================= Thanh trên cùng ================= -->
+<div class="topbar">
+  <div class="container topbar-in">
+    <span class="tb-item">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      COSC63170 · Mã hóa thông tin nâng cao
+    </span>
+    <span class="tb-item tb-hide">Mật mã tự cài đặt bằng Python · không dùng thư viện mã hóa</span>
+    <a class="btn btn-yellow btn-sm" href="/#ky">Ký file ngay</a>
+  </div>
+</div>
+
+<!-- ================= Menu ================= -->
+<header class="navbar">
+  <div class="container nav-in">
+    <a class="logo" href="/" aria-label="Ký số, trang chủ">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#1239AC"/><path d="M11 25c4-1 6-9 9-9s2 6 5 6 3-4 4-6" fill="none" stroke="#F7C02D" stroke-width="2.6" stroke-linecap="round"/><path d="M11 29h18" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Ký<b>Số</b></span>
+    </a>
+    <nav class="menu" aria-label="Menu chính">
+      <a href="/" class="{{ 'on' if active_page == 'home' }}">Ký số</a>
+      <a href="/#xacminh">Xác minh</a>
+      <a href="/#kientruc">Kiến trúc</a>
+    </nav>
+    <div class="quick">
+      <span class="quick-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM7 9l3 3-3 3M12 15h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span><small>CHẠY NHANH</small><code>python app.py</code></span>
+    </div>
+  </div>
+</header>
+
+<!-- ================= Banner trang ================= -->
+<section class="hero">
+  <div class="container hero-in">
+    <div class="eyebrow light"><span class="eb-ico"></span>{% block eyebrow %}{% endblock %}</div>
+    <h1>{% block heading %}{% endblock %}</h1>
+    <p class="hero-lede">{% block lede %}{% endblock %}</p>
+    <div class="crumb"><a href="/">Trang chủ</a><span>›</span>{% block crumb %}{% endblock %}</div>
+  </div>
+</section>
+
+<main>
+{% block content %}{% endblock %}
+</main>
+
+<!-- ================= Dải thống kê ================= -->
+<section class="stats">
+  <div class="container stats-in">
+    <div class="stat"><b>3</b><span>lược đồ chữ ký: RSA, ElGamal, DSA</span></div>
+    <div class="stat"><b>8</b><span>module mật mã tự viết</span></div>
+    <div class="stat"><b>7</b><span>bước kiểm tra khi xác minh</span></div>
+    <div class="stat"><b>0</b><span>thư viện mã hóa bên ngoài</span></div>
+  </div>
+</section>
+
+<!-- ================= Kêu gọi ================= -->
+<section class="cta container">
+  <div class="cta-box">
+    <div>
+      <div class="eyebrow"><span class="eb-ico"></span>Nhận được file đã ký?</div>
+      <h2>Kiểm tra file có bị sửa và ai đã ký</h2>
+      <p>Tải file lên khung Xác minh: hệ thống băm lại nội dung, kiểm tra chữ ký của người ký và chứng chỉ do CA cấp, gồm cả thời hạn và danh sách thu hồi.</p>
+    </div>
+    <a class="btn btn-yellow" href="/#xacminh">Xác minh file</a>
+  </div>
+</section>
+
+<!-- ================= Footer ================= -->
+<footer class="footer">
+  <div class="container foot-in">
+    <div class="foot-col foot-brand">
+      <a class="logo logo-light" href="/"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#fff"/><path d="M11 25c4-1 6-9 9-9s2 6 5 6 3-4 4-6" fill="none" stroke="#F7C02D" stroke-width="2.6" stroke-linecap="round"/><path d="M11 29h18" stroke="#1239AC" stroke-width="2" stroke-linecap="round"/></svg><span>Ký<b>Số</b></span></a>
+      <p>Demo ký số phục vụ môn Mã hóa thông tin nâng cao. Chỉ dùng để học, không có giá trị pháp lý.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Trang</h4>
+      <a href="/">Ký số</a><a href="/#ky">Ký file</a><a href="/#xacminh">Xác minh chữ ký</a><a href="/#kientruc">Kiến trúc</a>
+    </div>
+    <div class="foot-col">
+      <h4>Lược đồ chữ ký</h4>
+      <span>RSA-PSS 2048</span><span>ElGamal 2048</span><span>DSA (2048, 256)</span>
+    </div>
+    <div class="foot-col">
+      <h4>Tài liệu trong project</h4>
+      <span><code>README.md</code></span><span><code>docs/THIET-KE.md</code></span><span><code>deploy/install.sh</code></span>
+    </div>
+  </div>
+  <div class="container copyright">COM608 · Ký số · mật mã tự cài đặt bằng Python</div>
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

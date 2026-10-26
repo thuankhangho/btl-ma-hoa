@@ -1,0 +1,2 @@
+# Chỉ cần web server. Mật mã nằm trong mycrypto/ (tự cài đặt).
+flask>=3.0

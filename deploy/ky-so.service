@@ -1,0 +1,41 @@
+# Mẫu unit systemd — install.sh thay các giá trị @...@ rồi ghi vào /etc/systemd/system/@APP_NAME@.service
+[Unit]
+Description=Ky so (Flask + Gunicorn) - COM608 demo
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@APP_USER@
+Group=@APP_USER@
+WorkingDirectory=@APP_DIR@
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=@APP_DIR@/.venv/bin/gunicorn \
+    --bind @BIND@ \
+    --workers @WORKERS@ \
+    --timeout @TIMEOUT@ \
+    --access-logfile - \
+    --error-logfile - \
+    wsgi:app
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=3
+
+# --- Giới hạn quyền ---
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=@APP_DIR@/keys
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

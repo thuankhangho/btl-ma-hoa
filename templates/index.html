@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% set active_page = "home" %}
+{% block title %}Ký số{% endblock %}
+{% block eyebrow %}Demo Python · COM608{% endblock %}
+{% block heading %}Ký số{% endblock %}
+{% block lede %}Ký và xác minh file bằng 3 lược đồ chữ ký của Bài 6: RSA-PSS, ElGamal và DSA. Toàn bộ được tự viết trong <code>mycrypto/</code>, không dùng thư viện mã hóa. Mỗi khóa được một CA demo cấp chứng chỉ, nên bên xác minh biết ai đã ký.{% endblock %}
+{% block crumb %}<span>Ký số</span>{% endblock %}
+
+{% block content %}
+<section class="section container">
+  <div class="sec-head">
+    <div class="eyebrow"><span class="eb-ico"></span>Ký số tài liệu</div>
+    <h2>Tải file lên, ký và xác minh</h2>
+    <p>Chọn lược đồ, tạo khóa (CA tự cấp chứng chỉ), tải file lên rồi ký. Khối chữ ký được nối vào cuối file và xác minh được ở cột bên phải.</p>
+  </div>
+  <div class="desks">
+  <!-- ========== KÝ ========== -->
+  <div class="desk" id="ky">
+    <h3 class="desk-title"><span class="n">01</span>Ký và nhúng chữ ký</h3>
+
+    <div class="step-head"><span class="step-no">Bước 1</span>Chọn khóa để ký</div>
+    <p class="note">Khóa ký giống như con dấu của người ký. Máy chủ dùng <b>khóa bí mật</b> để tạo chữ ký; người nhận dùng <b>khóa công khai</b> và <b>chứng chỉ</b> để kiểm tra. Bạn có thể dùng lại một khóa đã tạo hoặc tạo khóa mới.</p>
+
+    <div class="seg" role="tablist" aria-label="Cách chọn khóa">
+      <button type="button" role="tab" id="tabUse" class="seg-btn on" aria-selected="true" aria-controls="panelUse">Dùng khóa đã có <small id="keyCount"></small></button>
+      <button type="button" role="tab" id="tabNew" class="seg-btn" aria-selected="false" aria-controls="panelNew">+ Tạo khóa mới</button>
+    </div>
+
+    <!-- Tab 1: dùng khóa đã có -->
+    <div class="keybox" id="panelUse" role="tabpanel" aria-labelledby="tabUse">
+      <div class="field"><label for="keySel">Chọn khóa trong danh sách</label>
+        <select id="keySel"></select></div>
+      <p class="note" id="noKeys" hidden>Chưa có khóa nào. Chọn tab “+ Tạo khóa mới” để tạo khóa đầu tiên.</p>
+      <div class="key-card" id="keyCard">
+        <div class="kc-row"><span>Chủ khóa</span><b id="keyOwner">…</b></div>
+        <div class="kc-row"><span>Thuật toán</span><b><span class="pill" id="keyAlgPill">…</span></b></div>
+        <div class="kc-row"><span>Chứng chỉ</span><span class="mono" id="certInfo">…</span></div>
+        <div class="kc-row"><span>Dấu vân tay</span><span class="mono" id="fp">…</span></div>
+        <p class="note" id="algNote"></p>
+        <details><summary class="note">Xem khóa công khai (PEM)</summary>
+          <textarea id="pubPem" rows="6" readonly></textarea>
+          <div class="row" style="margin-top:6px"><button type="button" id="copyPem">Sao chép PEM</button><button type="button" id="copyFp">Sao chép dấu vân tay</button></div>
+        </details>
+      </div>
+      <p class="note ok-note" id="keyStatus" hidden></p>
+    </div>
+
+    <!-- Tab 2: tạo khóa mới -->
+    <div class="keybox" id="panelNew" role="tabpanel" aria-labelledby="tabNew" hidden>
+      <div class="grid2">
+        <div class="field"><label for="owner">Tên chủ khóa (ghi vào chứng chỉ)</label>
+          <input type="text" id="owner" value="{{ cfg.DEFAULT_SIGNER }}"></div>
+        <div class="field"><label for="alg">Thuật toán chữ ký</label>
+          <select id="alg">
+            {% for k, a in algorithms.items() %}<option value="{{ k }}" {% if k == cfg.DEFAULT_ALGORITHM %}selected{% endif %}>{{ a.name }}</option>{% endfor %}
+          </select></div>
+      </div>
+      <p class="note" id="algDesc"></p>
+      <div class="row"><button type="button" class="btn btn-yellow" id="genKey">Tạo khóa và xin chứng chỉ</button><span class="busy" id="keyBusy"></span></div>
+      <p class="note">Máy chủ sinh cặp khóa, CA demo cấp chứng chỉ cho tên ở trên, rồi khóa mới được chọn sẵn để ký.</p>
+    </div>
+
+    <div class="step-head"><span class="step-no">Bước 2</span>Chọn file cần ký</div>
+    <div class="field">
+      <label for="signFile">File cần ký (tối đa {{ cfg.MAX_UPLOAD_MB }} MB)</label>
+      <div class="drop" id="signDrop">
+        <div><div class="fname" id="signName">(chưa có file)</div><div class="meta" id="signMeta"></div></div>
+        <div class="row">
+          <button id="sampleBtn">Dùng file mẫu</button>
+          <label class="row" style="margin:0"><input type="file" id="signFile" hidden><span class="pick primary" tabindex="0" id="pickBtn">Chọn file…</span></label>
+        </div>
+      </div>
+      <span class="note">Kéo thả file vào khung. Khối chữ ký được nối vào cuối file.</span>
+    </div>
+
+    <div class="step-head"><span class="step-no">Bước 3</span>Thông tin ký và ký</div>
+    <div class="grid2">
+      <div class="field"><label for="signer">Người ký (lấy theo chủ khóa)</label><input type="text" id="signer" value="{{ cfg.DEFAULT_SIGNER }}"></div>
+      <div class="field"><label for="reason">Lý do ký</label><input type="text" id="reason" value="{{ cfg.DEFAULT_REASON }}"></div>
+    </div>
+
+    <div class="row"><button class="btn btn-yellow" id="signBtn">Ký file</button><span class="busy" id="signBusy"></span></div>
+
+    <div class="field" id="signOut" hidden>
+      <span class="lbl">Các bước máy chủ đã thực hiện</span>
+      <ol class="steps" id="signSteps"></ol>
+      <div class="row">
+        <button class="btn btn-yellow" id="dlSigned">Tải file đã ký</button>
+        <button id="dlSigJson">Tải chữ ký rời (.json)</button>
+        <button id="toVerify">Chuyển sang xác minh →</button>
+      </div>
+      <span class="note" id="dlNote"></span>
+    </div>
+  </div>
+
+  <!-- ========== XÁC MINH ========== -->
+  <div class="desk" id="xacminh">
+    <h3 class="desk-title"><span class="n">02</span>Xác minh chữ ký</h3>
+    <div class="field">
+      <label for="verFile">File đã ký</label>
+      <div class="drop" id="verDrop">
+        <div><div class="fname" id="verName">(chưa có file)</div><div class="meta" id="verMeta"></div></div>
+        <label class="row" style="margin:0"><input type="file" id="verFile" hidden><span class="pick" tabindex="0" id="pickVer">Chọn file…</span></label>
+      </div>
+      <div class="row">
+        <button id="useSigned" disabled>Dùng file vừa ký</button>
+        <button class="danger" id="useTampered" disabled>Dùng bản bị sửa 1 byte</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="expectFp">Dấu vân tay tin cậy (tùy chọn, khi không dùng chứng chỉ)</label>
+      <input type="text" id="expectFp" placeholder="Để trống: tin theo chứng chỉ do CA cấp">
+      <span class="note">Khóa công khai nằm ngay trong file nên chỉ chứng minh tính toàn vẹn. Danh tính người ký được xác thực qua chứng chỉ do <b id="caName">CA</b> ký (dấu vân tay CA: <span class="mono" id="caFp">…</span>).</span>
+      <div class="row"><button class="danger" id="revokeBtn" disabled>Thu hồi chứng chỉ của khóa đang dùng (CRL)</button></div>
+    </div>
+    <div class="row"><button class="btn btn-yellow" id="verBtn" disabled>Xác minh</button><span class="busy" id="verBusy"></span></div>
+
+    <div id="verOut" class="field" hidden>
+      <div class="verdict" id="verdict"></div>
+      <div class="checks" id="checks"></div>
+      <span class="lbl" style="margin-top:6px">Thông tin trong khối chữ ký</span>
+      <ol class="steps" id="verSteps"></ol>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section section-alt">
+  <div class="container faq-grid">
+    <div class="faq-side">
+      <div class="eyebrow"><span class="eb-ico"></span>Kiến trúc và kỹ thuật</div>
+      <h2>Bên trong demo Ký số</h2>
+      <p>Ba phần bên cạnh trả lời các câu hỏi thường gặp: hệ thống gồm những tầng nào, mỗi module mật mã cài đặt chuẩn gì, và project đáp ứng yêu cầu Bài 6 ra sao.</p>
+      <div class="side-card">
+        <b>Lý thuyết chi tiết</b>
+        <span>Xem <code>docs/THIET-KE.md</code> trong project.</span>
+      </div>
+    </div>
+    <div class="faq-list">
+      <details class="acc" id="kientruc" open>
+        <summary><span>Hệ thống gồm những tầng nào?</span><i aria-hidden="true"></i></summary>
+        <div class="acc-body">
+    <div class="formula">Trình duyệt (HTML + static/app.js)
+   │  multipart/form-data, JSON
+   ▼
+app.py  (Flask: chỉ định tuyến HTTP)
+   │
+   ▼
+signing/   keys.py · format.py · signer.py · verifier.py      ← tầng ứng dụng
+   │
+   ▼
+mycrypto/  sha256 · hmac · numtheory · rsa · elgamal · dsa · der  ← mật mã tự cài đặt
+   │
+   ▼
+keys/*.json  (kho khóa bí mật, tham số DSA, khóa CA, CRL — chỉ máy chủ đọc được)</div>
+    <p>Khóa bí mật được sinh và lưu trên máy chủ. Trình duyệt chỉ nhận khóa công khai, dấu vân tay và file đã ký. Định dạng khối chữ ký giống hệt bản JavaScript, nên file ký bằng bản web JS cũng xác minh được ở đây.</p>
+  </div>
+      </details>
+      <details class="acc" id="modules">
+        <summary><span>Các module mật mã tự cài đặt theo chuẩn nào?</span><i aria-hidden="true"></i></summary>
+        <div class="acc-body">
+    <div class="tbl"><table>
+      <thead><tr><th>Module</th><th>Nội dung</th><th>Chuẩn</th></tr></thead>
+      <tbody>
+        <tr><td><code>sha256.py</code></td><td>Đệm, lịch thông điệp W₀…W₆₃, 64 vòng nén với Σ0, Σ1, Ch, Maj</td><td>FIPS 180-4</td></tr>
+        <tr><td><code>hmac.py</code></td><td>H((K ⊕ opad) ‖ H((K ⊕ ipad) ‖ m)), dùng để sinh k cho DSA</td><td>RFC 2104</td></tr>
+        <tr><td><code>numtheory.py</code></td><td>Bình phương và nhân, Euclid mở rộng, nghịch đảo mô-đun, Miller-Rabin, sinh số nguyên tố, căn nguyên thủy</td><td>FIPS 186-4 C.3</td></tr>
+        <tr><td><code>rsa.py</code></td><td>Sinh khóa (λ(n), CRT), RSASP1/RSAVP1, MGF1, EMSA-PSS encode/verify</td><td>RFC 8017</td></tr>
+        <tr><td><code>elgamal.py</code></td><td>r = αᵏ, s = k⁻¹(m − a·r) mod (p−1); xác minh βʳrˢ ≡ αᵐ trên nhóm 2048 bit</td><td>ElGamal 1985, RFC 3526</td></tr>
+        <tr><td><code>dsa.py</code></td><td>Sinh tham số (p, q, g), r = (gᵏ mod p) mod q, s = k⁻¹(H + x·r) mod q</td><td>FIPS 186-4</td></tr>
+        <tr><td><code>rfc6979.py</code></td><td>Sinh k tất định cho DSA từ (x, H(m)) bằng HMAC-DRBG</td><td>RFC 6979</td></tr>
+        <tr><td><code>der.py</code></td><td>TLV, OID, SubjectPublicKeyInfo cho RSA, DSA, ElGamal; PEM</td><td>X.690, RFC 5280/3279</td></tr>
+      </tbody>
+    </table></div>
+    <p>Độ đúng được kiểm chứng trong <code>tests/</code>: so SHA-256 và HMAC với <code>hashlib</code>/<code>hmac</code>, chạy test vector RFC 6979, và cho thư viện <code>cryptography</code> xác minh chữ ký do code tự viết tạo ra (và ngược lại). Các thư viện chuẩn chỉ dùng trong test để đối chiếu. Lý thuyết chi tiết nằm trong <code>docs/THIET-KE.md</code>.</p>
+  </div>
+      </details>
+      <details class="acc" id="bai6">
+        <summary><span>Project đáp ứng yêu cầu Bài 6 thế nào?</span><i aria-hidden="true"></i></summary>
+        <div class="acc-body">
+    <div class="tbl"><table>
+      <thead><tr><th>Nội dung Bài 6</th><th>Trong demo</th></tr></thead>
+      <tbody>
+        <tr><td>6.4.2 Mô hình băm rồi ký</td><td>Cả 3 lược đồ ký trên SHA-256 của thông điệp chuẩn hóa M (gồm giá trị băm file và siêu dữ liệu)</td></tr>
+        <tr><td>6.4.3 Chữ ký RSA</td><td>RSA-PSS 2048: s = EMᵈ mod n, đệm PSS ngẫu nhiên, ký nhanh bằng CRT</td></tr>
+        <tr><td>6.4.4 Chữ ký ElGamal</td><td>ElGamal 2048 trên nhóm RFC 3526, k ngẫu nhiên mới mỗi lần, gcd(k, p−1) = 1</td></tr>
+        <tr><td>6.4.6 Chữ ký DSA</td><td>DSA (2048, 256), chữ ký 64 byte; kiểm tra 0 &lt; r, s &lt; q</td></tr>
+        <tr><td>6.4.8 Tái dùng k</td><td>DSA sinh k tất định theo RFC 6979, nên không tái dùng k cho hai thông điệp khác nhau</td></tr>
+        <tr><td>6.4.10 PKI và chứng chỉ</td><td>CA demo (RSA-PSS) cấp chứng chỉ khi tạo khóa; xác minh chữ ký CA, khớp khóa, hạn dùng, thu hồi (CRL)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+      </details>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script id="algInfo" type="application/json">{{ algorithms | tojson }}</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}
