@@ -140,6 +140,6 @@ cat <<EOF
 Hoàn tất.
   Trạng thái : systemctl status $APP_NAME
   Nhật ký    : journalctl -u $APP_NAME -f
-  Khởi động lại sau khi sửa code: sudo bash deploy/install.sh
+  Cập nhật code (sau git pull): sudo bash deploy/update.sh
   Gỡ cài đặt : sudo bash deploy/uninstall.sh
 EOF
